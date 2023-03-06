@@ -4,13 +4,13 @@ module mul8_pipeline_tb();
 	reg [7:0] 	a_i = 0;
 	reg [7:0] 	b_i = 0;
 	reg			valid_i = 0;
-	reg			clk = 0;
+	reg			clk = 1;
 	wire [7:0]	p_o;
 	wire		valid_o;
-	reg [7:0]	actual_ans_0 = 0;
-	reg [7:0]	actual_ans_1 = 0;
-	reg [7:0]	actual_ans_2 = 0;
-	reg [7:0]	actual_ans_3 = 0;
+	reg [15:0]	actual_ans_0 = 0;
+	reg [15:0]	actual_ans_1 = 0;
+	reg [15:0]	actual_ans_2 = 0;
+	reg [15:0]	actual_ans_3 = 0;
 	
 	localparam period = 10; 
 	initial begin
@@ -25,27 +25,29 @@ module mul8_pipeline_tb();
 			
             // 产生用于测试的a、b信号值
             a_i = 8'h55;
-            b_i = 8'h55;
-			actual_ans_0 = a_i*b_i;
+            b_i = 8'h45;
+			actual_ans_0 =  (a_i*b_i)>>8;
 			valid_i = 1;
             #period; // 等待一个信号周期
 
             a_i = 8'h55;
             b_i = 8'h65;
-			actual_ans_1 = a_i*b_i;
+			actual_ans_1 = (a_i*b_i)>>8;
 			#period;
 			
 			a_i = 8'h65;
             b_i = 8'h65;
-			actual_ans_2 = a_i*b_i;
-			#period;			
-			valid_i = 0;
+			actual_ans_2 = (a_i*b_i)>>8;
+			#period;
 			
-			#(period*100);
+			valid_i = 0;
+			a_i = 0;
+            b_i = 0;
+			#(period*10);
 			
 			a_i = 8'h45;
             b_i = 8'h45;
-			actual_ans_3 = a_i*b_i;
+			actual_ans_3 = (a_i*b_i)>>8;
 			valid_i = 1;
 			#period;
 			

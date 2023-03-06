@@ -4,10 +4,10 @@ module mul8_loop_tb();
 	reg [7:0] 	a_i = 0;
 	reg [7:0] 	b_i = 0;
 	reg			start = 0;
-	reg			clk = 0;
+	reg			clk = 1;
 	wire [7:0]	p_o;
 	wire		busy;
-	reg [7:0]	actual_ans = 0;
+	reg [15:0]	actual_ans = 0;
 	
 	localparam period = 10; 
 	initial begin
@@ -21,9 +21,9 @@ module mul8_loop_tb();
 			#(period*100);
 			
             // 产生用于测试的a、b信号值
-            a_i = 8'h55;
+            a_i = 8'h45;
             b_i = 8'h55;
-			actual_ans = a_i*b_i;
+			actual_ans = (a_i*b_i)>>8;
 			start = 1;
             #period; // 等待一个信号周期
 
