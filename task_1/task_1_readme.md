@@ -23,6 +23,7 @@
 ![](mul8_loop_wave.png)
 
 由图可知，循环结构的延迟为8个时钟周期。
+
 ### 1.4 最高工作频率
 
 Clock | Edges (WNS) | WNS (ns) | WHS (ns) | WPWS (ns) | Total Endpoints (TNS) |
@@ -30,15 +31,12 @@ Clock | Edges (WNS) | WNS (ns) | WHS (ns) | WPWS (ns) | Total Endpoints (TNS) |
 |clk | rise-rise | 8.201 | 0.063 | 4.5 | 37 |
 
 由
-$$
-F_{max} = \dfrac{1}{(T-WNS)}
+F_max = 1/(T-WNS)
 且
-T = 10(ns)
-$$
+T = 10(ns),
 可求
-$$
-F_{max} = 555.86 MHz
-$$
+F_max = 555.86 MHz
+
 ## 2 流水线结构
 
 ### 2.1 主要结构示意图
@@ -67,15 +65,12 @@ Clock | Edges (WNS) | WNS (ns) | WHS (ns) | WPWS (ns) | Total Endpoints (TNS) |
 clk | rise-rise | 7.82 | 0.065 | 4.146 | 84 |
 
 由
-$$
-F_{max} = \dfrac{1}{(T-WNS)}
+F_max = 1/(T-WNS)
 且
-T = 10(ns)
-$$
+T = 10(ns),
 可求
-$$
-F_{max} = 458.72 MHz
-$$
+F_max = 458.72 MHz
+
 
 ## 3 并行结构
 
@@ -106,12 +101,9 @@ Clock | Edges (WNS) | WNS (ns) | WHS (ns) | WPWS (ns) | Total Endpoints (TNS) |
 clk | rise - rise | 7.374 | 0.166 | 4.5 | 8 |
 
 由
-$$
-F_{max} = \dfrac{1}{(T-WNS)}
+F_max = 1/(T-WNS)
 且
-T = 10(ns)
-$$
+T = 10(ns),
 可求
-$$
-F_{max} = 380.81 MHz
-$$
+F_max = 380.81 MHz
+
