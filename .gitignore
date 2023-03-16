@@ -1,6 +1,6 @@
-task1.xi
-
 # ignore xilinx file
+task_1/task1.xi/*
+!task_1/task1.xi/fpga_task1.xpr
 task_2/xi_median_filter/*
 !task_2/xi_median_filter/xi_median_filter.xpr
 
