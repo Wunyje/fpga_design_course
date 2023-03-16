@@ -22,8 +22,9 @@
 
 module median_filter(
     input [7:0] dat_i,
-    input val_i,
+    input       val_i,
     output [7:0] dat_o,
-    output val_o
+    output      val_o
     );
+    
 endmodule
