@@ -33,10 +33,49 @@
 
 
 module median_filter(
-    input [7:0] dat_i,
-    input       val_i,
-    output [7:0] dat_o,
-    output      val_o
+	input			clk,
+    input [7:0] 	dat_i,
+    input       	val_i,
+    output [7:0] 	dat_o,
+    output      	val_o
     );
 
+	localparam WIDTH = 9;
+	reg [7 : 0] dat_i_r [0:WIDTH-1];
+	always@(posedge ) begin:fit_in_width
+		integer width_i = 0;
+		for(width_i = 0; width_i < WIDTH; width_i = width_i + 1) begin
+			if(width_i == 0)
+				if(val_i) 
+					dat_i_r[width_i] <= dat_i;
+				else
+					dat_i_r[width_i] <= 8'b0;
+			else
+				dat_i_r[width_i] <= dat_i_r[width_i - 1];
+		end
+	end
+	
+	reg [7:0] dat_i_pip [0:WIDTH*WIDTH-1];
+	always@(posedge ) begin:buble_pip
+		integer stage_0_i = 0;
+		for(stage_0_i = 0; stage_0_i < WIDTH; stage_0_i = stage_0_i + 1) begin
+			dat_i_pip[stage_0_i] <= dat_i_r[stage_0_i];
+		end
+	end
+	
+	always@(posedge ) begin:buble_pip
+		integer stage_i = 0;
+		for(stage_i = 0; stage_i < WIDTH; stage_i = stage_i + 1) begin
+			if(stage_i == 0) begin
+				dat_i_pip[stage_i] <= dat_i_r[stage_i];
+				if(dat_i_r[stage_i] < dat_i_r[stage_i + 1]) begin
+					dat_i_pip[stage_i + WIDTH + 1] <= dat_i_r[stage_i];
+					dat_i_pip[stage_i + WIDTH] <= dat_i_r[stage_i + 1];
+				end
+				
+			end
+			
+
+		end
+	end
 endmodule
