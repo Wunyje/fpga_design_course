@@ -1,3 +1,6 @@
+# ignore timegen file
+*.tim
+
 # ignore xilinx file
 task_1/task1.xi/*
 !task_1/task1.xi/fpga_task1.xpr
