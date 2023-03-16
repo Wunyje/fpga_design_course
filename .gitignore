@@ -1,5 +1,6 @@
-# ignore timegen file
+# ignore timegen and excel file
 *.tim
+*.xlsx
 
 # ignore xilinx file
 task_1/task1.xi/*
