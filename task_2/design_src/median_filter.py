@@ -60,14 +60,14 @@ def bubbleSort_partial_expand(arr_i):
 
 if __name__ == '__main__':
     width = 9
-    if not median_filter([5 ,3, 4], width = width) \
-        == list(signal.medfilt([5 ,3, 4],width)):
+    if not median_filter([5 ,3, 4, 2, 1, 5 ,3, 4, 2, 1], width = width) \
+        == list(signal.medfilt([5 ,3, 4, 2, 1, 5 ,3, 4, 2, 1],width)):
         print('-'*20,'\n', 'Test 0 failed')
     elif not median_filter([5 ,3, 4, 2, 1], width = width) \
         == list(signal.medfilt([5 ,3, 4, 2, 1],width)):
         print('-'*20,'\n', 'Test 1 failed')
-    elif not median_filter([5 ,3, 4, 2, 1, 5 ,3, 4, 2, 1], width = width) \
-        == list(signal.medfilt([5 ,3, 4, 2, 1, 5 ,3, 4, 2, 1],width)):
+    elif not median_filter([5 ,3, 4], width = width) \
+        == list(signal.medfilt([5 ,3, 4],width)):
         print('-'*20,'\n', 'Test 2 failed')
     else:
         print('-'*20,'\n', 'All test passed')

@@ -33,25 +33,26 @@
 
 
 module median_filter(
-	input			clk,
-    input [7:0] 	dat_i,
-    input       	val_i,
-    output [7:0] 	dat_o,
+	input			clk		,
+    input [7:0] 	dat_i	,
+    input       	val_i	,
+    output [7:0] 	dat_o	,
     output      	val_o
     );
 
-	localparam WIDTH = 9;
-	localparam MID_IND = (WIDTH-1)/2;
-	reg [7 : 0] 		dat_i_r [0:WIDTH-1];
-	reg [7 : 0] 		dat_i_pip [0:WIDTH*WIDTH-1];
-	reg [WIDTH-1:0] 	valid_r = 0;
+	localparam 						WIDTH = 9;
+	localparam 						MID_IND = (WIDTH-1)/2;
+	localparam 						WORD_LEN = 8;
+	reg [WORD_LEN-1 : 0] 				dat_i_r [0:WIDTH-1];
+	reg [WORD_LEN*WIDTH-1 : 0] 		dat_i_pip [0:WIDTH-1];
+	reg [MID_IND+WIDTH:0] 			valid_r = 0;
 	
 	integer 	width_i = 0;
-	assign 	val_o = valid_r[WIDTH-1];
-	assign		dat_o = dat_i_pip[76];//dat_i_pip[MID_IND + (WIDTH-1)*WIDTH];	
+	assign 		val_o = valid_r[MID_IND+WIDTH];
+	assign		dat_o = dat_i_pip[WIDTH-1][MID_IND*WORD_LEN +: WORD_LEN];	
 	
 	always@(posedge clk) begin:valid_pass
-		for(width_i = 0; width_i < WIDTH; width_i = width_i + 1) begin
+		for(width_i = 0; width_i < MID_IND+WIDTH+1; width_i = width_i + 1) begin
 			if(width_i == 0)
 				valid_r[width_i] <= val_i;
 			else
@@ -76,25 +77,26 @@ module median_filter(
 	always@(posedge clk) begin:prime_pip
 		for(width_prime_i = 0; width_prime_i < WIDTH; width_prime_i = width_prime_i + 2) begin
 			if(width_prime_i == 0) 
-				dat_i_pip[width_prime_i] <= dat_i_r[width_prime_i];
+				dat_i_pip[0][width_prime_i*WORD_LEN +: WORD_LEN] <= dat_i_r[width_prime_i];
 			else begin
-				dat_i_pip[width_prime_i] <= (dat_i_r[width_prime_i]>dat_i_r[width_prime_i-1])?dat_i_r[width_prime_i]:dat_i_r[width_prime_i-1];
-				dat_i_pip[width_prime_i-1] <= (dat_i_r[width_prime_i]>dat_i_r[width_prime_i-1])?dat_i_r[width_prime_i-1]:dat_i_r[width_prime_i];
+				dat_i_pip[0][width_prime_i*WORD_LEN +: WORD_LEN] <= (dat_i_r[width_prime_i]<dat_i_r[width_prime_i-1])?dat_i_r[width_prime_i]:dat_i_r[width_prime_i-1];
+				dat_i_pip[0][(width_prime_i-1)*WORD_LEN +: WORD_LEN] <= (dat_i_r[width_prime_i]<dat_i_r[width_prime_i-1])?dat_i_r[width_prime_i-1]:dat_i_r[width_prime_i];
 			end	
 		end
 	end
 
 	integer width_odd_i = 0;
-	genvar stage_odd_i;
+	genvar 	stage_odd_i;
 	generate
 		for(stage_odd_i = 1;stage_odd_i < WIDTH; stage_odd_i = stage_odd_i+2) begin:pip_stages_odd
 			always@(posedge clk) begin:odd_pip
 				for(width_odd_i = 0; width_odd_i < WIDTH; width_odd_i = width_odd_i + 2) begin
 					if(width_odd_i == WIDTH-1) 
-						dat_i_pip[width_odd_i*(stage_odd_i)] <= dat_i_pip[width_odd_i*(stage_odd_i-1)];
+						dat_i_pip[stage_odd_i][width_odd_i*WORD_LEN +: WORD_LEN] <= dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN];
 					else begin
-						dat_i_pip[width_odd_i*(stage_odd_i)] <= (dat_i_pip[width_odd_i*(stage_odd_i-1)]<dat_i_pip[width_odd_i*(stage_odd_i-1)+1])?dat_i_pip[width_odd_i*(stage_odd_i-1)]:dat_i_pip[width_odd_i*(stage_odd_i-1)+1];
-						dat_i_pip[width_odd_i*(stage_odd_i)+1] <= (dat_i_pip[width_odd_i*(stage_odd_i-1)]<dat_i_pip[width_odd_i*(stage_odd_i-1)+1])?dat_i_pip[width_odd_i*(stage_odd_i-1)+1]:dat_i_pip[width_odd_i*(stage_odd_i-1)];
+						dat_i_pip[stage_odd_i][width_odd_i*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN]>dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN];
+					
+						dat_i_pip[stage_odd_i][(width_odd_i+1)*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_odd_i-1)][width_odd_i]>dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN];
 					end	
 				end
 			end
@@ -102,16 +104,17 @@ module median_filter(
 	endgenerate
 	
 	integer 	width_even_i = 0;
-	genvar stage_even_i;
+	genvar 		stage_even_i;
 	generate
 		for(stage_even_i = 2;stage_even_i < WIDTH; stage_even_i = stage_even_i+2) begin:pip_stages_even
 			always@(posedge clk) begin:even_pip
 				for(width_even_i = 0; width_even_i < WIDTH; width_even_i = width_even_i + 2) begin
 					if(width_even_i == 0) 
-						dat_i_pip[width_even_i*(stage_even_i)] <= dat_i_pip[width_even_i*(stage_even_i-1)];
+						dat_i_pip[(stage_even_i)][width_even_i*WORD_LEN +: WORD_LEN] <= dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN];
 					else begin
-						dat_i_pip[width_even_i*(stage_even_i)] <= (dat_i_pip[width_even_i*(stage_even_i-1)]>dat_i_pip[width_even_i*(stage_even_i-1)-1])?dat_i_pip[width_even_i*(stage_even_i-1)]:dat_i_pip[width_even_i*(stage_even_i-1)-1];
-						dat_i_pip[width_even_i*(stage_even_i)-1] <= (dat_i_pip[width_even_i*(stage_even_i-1)]>dat_i_pip[width_even_i*(stage_even_i-1)-1])?dat_i_pip[width_even_i*(stage_even_i-1)-1]:dat_i_pip[width_even_i*(stage_even_i-1)];
+						dat_i_pip[(stage_even_i)][width_even_i*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN]<dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN];
+					
+						dat_i_pip[(stage_even_i)][(width_even_i-1)*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN]<dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN];
 					end	
 				end
 			end
