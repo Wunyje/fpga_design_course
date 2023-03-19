@@ -60,6 +60,7 @@ def bubbleSort_partial_expand(arr_i):
 
 if __name__ == '__main__':
     width = 9
+    # 1 2 3 3 3 3 2 2 1 1
     if not median_filter([5 ,3, 4, 2, 1, 5 ,3, 4, 2, 1], width = width) \
         == list(signal.medfilt([5 ,3, 4, 2, 1, 5 ,3, 4, 2, 1],width)):
         print('-'*20,'\n', 'Test 0 failed')

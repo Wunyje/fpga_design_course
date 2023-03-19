@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Huazhong Univercity of Science and Technology
+// Engineer: Wunyje
 // 
 // Create Date: 2023/03/15 21:26:45
-// Design Name: 
+// Design Name: median_filter
 // Module Name: median_filter
 // Project Name: xi_median_filter
-// Target Devices: 
+// Target Devices: xa7a12tcpg238-2I
 // Tool Versions: Vivado 2019.1
 // Description: 
 //--               _   _   _   _   _   _   _   _   _   _   _   _  
@@ -21,8 +21,8 @@
 //--                               ___________                 ___
 //-- val_o        ________________|           |_______________|   
 //
-//   delay: 8 cycle
-//
+//   delay: 13 cycle(window width + mid position)
+//	
 // Dependencies: 
 // 
 // Revision:
@@ -45,12 +45,13 @@ module median_filter(
 	localparam 						WORD_LEN = 8;
 	reg [WORD_LEN-1 : 0] 				dat_i_r [0:WIDTH-1];
 	reg [WORD_LEN*WIDTH-1 : 0] 		dat_i_pip [0:WIDTH-1];
-	reg [MID_IND+WIDTH:0] 			valid_r = 0;
+	reg [MID_IND+WIDTH:0] 				valid_r = 0;
 	
 	integer 	width_i = 0;
 	assign 		val_o = valid_r[MID_IND+WIDTH];
 	assign		dat_o = dat_i_pip[WIDTH-1][MID_IND*WORD_LEN +: WORD_LEN];	
 	
+	// valid信号控制
 	always@(posedge clk) begin:valid_pass
 		for(width_i = 0; width_i < MID_IND+WIDTH+1; width_i = width_i + 1) begin
 			if(width_i == 0)
@@ -59,7 +60,8 @@ module median_filter(
 				valid_r[width_i] <= valid_r[width_i - 1];
 		end
 	end
-		
+	
+	// 接收寄存器，接收输入的dat_i
 	always@(posedge clk) begin:fit_in_width
 		for(width_i = 0; width_i < WIDTH; width_i = width_i + 1) begin
 			if(width_i == 0) begin
@@ -72,7 +74,12 @@ module median_filter(
 				dat_i_r[width_i] <= dat_i_r[width_i - 1];
 		end
 	end
-
+	
+	// ---------冒泡排序流水线设计-----------
+	// -  最大值最终在流水线最低层
+	// -  最小值最终在流水线最高层
+	// --------------------------------------
+	// 第0级流水，从dat_i_r中接收，进行相应置换
 	integer width_prime_i = 0;
 	always@(posedge clk) begin:prime_pip
 		for(width_prime_i = 0; width_prime_i < WIDTH; width_prime_i = width_prime_i + 2) begin
@@ -84,34 +91,36 @@ module median_filter(
 			end	
 		end
 	end
-
+	
+	// 奇数级流水，最高层值直接传递
 	integer width_odd_i = 0;
 	genvar 	stage_odd_i;
 	generate
 		for(stage_odd_i = 1;stage_odd_i < WIDTH; stage_odd_i = stage_odd_i+2) begin:pip_stages_odd
 			always@(posedge clk) begin:odd_pip
 				for(width_odd_i = 0; width_odd_i < WIDTH; width_odd_i = width_odd_i + 2) begin
-					if(width_odd_i == WIDTH-1) 
+					if(width_odd_i == WIDTH-1) // 传递最高层数值
 						dat_i_pip[stage_odd_i][width_odd_i*WORD_LEN +: WORD_LEN] <= dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN];
-					else begin
+					else begin // 比较交换传递给下一级
 						dat_i_pip[stage_odd_i][width_odd_i*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN]>dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN];
 					
-						dat_i_pip[stage_odd_i][(width_odd_i+1)*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_odd_i-1)][width_odd_i]>dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN];
+						dat_i_pip[stage_odd_i][(width_odd_i+1)*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN]>dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_odd_i-1)][(width_odd_i+1)*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_odd_i-1)][width_odd_i*WORD_LEN +: WORD_LEN];
 					end	
 				end
 			end
 		end
 	endgenerate
 	
+	// 偶数级流水，最低层值直接传递
 	integer 	width_even_i = 0;
 	genvar 		stage_even_i;
 	generate
 		for(stage_even_i = 2;stage_even_i < WIDTH; stage_even_i = stage_even_i+2) begin:pip_stages_even
 			always@(posedge clk) begin:even_pip
 				for(width_even_i = 0; width_even_i < WIDTH; width_even_i = width_even_i + 2) begin
-					if(width_even_i == 0) 
+					if(width_even_i == 0) 	// 传递最低层数值
 						dat_i_pip[(stage_even_i)][width_even_i*WORD_LEN +: WORD_LEN] <= dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN];
-					else begin
+					else begin	// 比较交换传递给下一级
 						dat_i_pip[(stage_even_i)][width_even_i*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN]<dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN];
 					
 						dat_i_pip[(stage_even_i)][(width_even_i-1)*WORD_LEN +: WORD_LEN] <= (dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN]<dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN])?dat_i_pip[(stage_even_i-1)][(width_even_i-1)*WORD_LEN +: WORD_LEN]:dat_i_pip[(stage_even_i-1)][width_even_i*WORD_LEN +: WORD_LEN];

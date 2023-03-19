@@ -40,8 +40,7 @@ module median_filter_tb();
 	initial // initial block executes only once
         begin
 			#(period*100);
-			
-			valid_i = 1;
+			valid_i = 1;// input:5342153421
             dat_i = 8'h5; #(period)
 			dat_i = 8'h3; #(period)
 			dat_i = 8'h4; #(period)
@@ -55,15 +54,40 @@ module median_filter_tb();
 			dat_i = 8'h0;
 			valid_i = 0;
 			
-            // #(period*10); // 等待一个信号周期
-			// valid_i = 1;
-            // dat_i = 8'h5; #(period)
-			// dat_i = 8'h3; #(period)
-			// dat_i = 8'h4; #(period)
-			// dat_i = 8'h2; #(period)
-			// dat_i = 8'h1; #(period)
-			// dat_i = 8'h0;
-			// valid_i = 0;
+            #(period*15); // 等待15个信号周期
+			valid_i = 1;// input:53421
+            dat_i = 8'h5; #(period)
+			dat_i = 8'h3; #(period)
+			dat_i = 8'h4; #(period)
+			dat_i = 8'h2; #(period)
+			dat_i = 8'h1; #(period)
+			dat_i = 8'h0;
+			valid_i = 0;
+			
+			#(period*15); // 等待15个信号周期
+			valid_i = 1;// input:5342153421
+            dat_i = 8'h5; #(period)
+			dat_i = 8'h3; #(period)
+			dat_i = 8'h4; #(period)
+			dat_i = 8'h2; #(period)
+			dat_i = 8'h1; #(period)
+			dat_i = 8'h5; #(period)
+			dat_i = 8'h3; #(period)
+			dat_i = 8'h4; #(period)
+			dat_i = 8'h2; #(period)
+			dat_i = 8'h1; #(period)
+			dat_i = 8'h0;
+			valid_i = 0;
+			
+            #(period*5); // 等待5个信号周期
+			valid_i = 1;// input:53421
+            dat_i = 8'h5; #(period)
+			dat_i = 8'h3; #(period)
+			dat_i = 8'h4; #(period)
+			dat_i = 8'h2; #(period)
+			dat_i = 8'h1; #(period)
+			dat_i = 8'h0;
+			valid_i = 0;
     end
 			
 	median_filter median_filter_inst
