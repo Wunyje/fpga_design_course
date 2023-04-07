@@ -10,3 +10,6 @@ task_2/xi_median_filter/*
 task_3/*
 !task_3/*.c
 *.json
+
+.vs
+.vscode
