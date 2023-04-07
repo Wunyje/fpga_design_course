@@ -41,11 +41,12 @@ module median_filter(
     );
 
 	localparam 						WIDTH = 9;
-	localparam 						MID_IND = (WIDTH-1)/2;
 	localparam 						WORD_LEN = 8;
-	reg [WORD_LEN-1 : 0] 				dat_i_r [0:WIDTH-1];
+	localparam 						MID_IND = (WIDTH-1)/2;
+
+	reg [WORD_LEN-1 : 0] 			dat_i_r [0:WIDTH-1];
 	reg [WORD_LEN*WIDTH-1 : 0] 		dat_i_pip [0:WIDTH-1];
-	reg [MID_IND+WIDTH:0] 				valid_r = 0;
+	reg [MID_IND+WIDTH:0] 			valid_r = 0;
 	
 	integer 	width_i = 0;
 	assign 		val_o = valid_r[MID_IND+WIDTH];
