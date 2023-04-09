@@ -10,6 +10,7 @@ task_2/xi_median_filter/*
 
 task_3/design_src/*
 !task_3/design_src/*.c
+!task_3/design_src/*.h
 !task_3/design_src/*.m
 !task_3/design_src/*.mat
 *.json
