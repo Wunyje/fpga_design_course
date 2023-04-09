@@ -7,8 +7,11 @@ task_1/task1.xi/*
 !task_1/task1.xi/fpga_task1.xpr
 task_2/xi_median_filter/*
 !task_2/xi_median_filter/xi_median_filter.xpr
-task_3/*
-!task_3/*.c
+
+task_3/design_src/*
+!task_3/design_src/*.c
+!task_3/design_src/*.m
+!task_3/design_src/*.mat
 *.json
 
 .vs
