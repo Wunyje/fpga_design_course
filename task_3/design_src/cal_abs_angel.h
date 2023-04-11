@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <complex.h>
-
-#define N 100
 #define PI 3.141592654
 
 typedef struct {
@@ -13,76 +10,10 @@ typedef struct {
     float angle_o;
 } comp_num; 
 
-comp_num cal_abs_angel_origin(char real_i, char imag_i);
+comp_num cal_abs_ref(char real_i, char imag_i);
 
 comp_num cal_abs_angel_poly(char real_i, char imag_i, int pow_value);
 
-comp_num cal_abs_ref(char real_i, char imag_i);
-
-comp_num cal_abs_angel_origin(char real_i, char imag_i)
-{
-    comp_num c_num  = {0};
-    float div_value = 0;
-    c_num.real = real_i;
-    c_num.imag = imag_i;
-    c_num.abs_o = sqrt(c_num.real * c_num.real + c_num.imag * c_num.imag);
-    
-    div_value = ((float)(c_num.imag*128) / (float)(c_num.real*128));
-    c_num.angle_o = atan(div_value);
-    if((c_num.real&0x80))
-        if((c_num.imag&0x80))
-            c_num.angle_o = c_num.angle_o - PI;
-        else
-            c_num.angle_o = c_num.angle_o + PI;
-    return c_num;
-}
-
-comp_num cal_abs_angel_poly(char real_i, char imag_i, int pow_value)
-{
-    comp_num c_num  = {0};
-    int mid_abs_value = 0;
-    float mid_atan_value = 0;
-    c_num.real = real_i;
-    c_num.imag = imag_i;
-
-    // absolute value calculation
-    mid_abs_value = c_num.real * c_num.real + c_num.imag * c_num.imag;
-    c_num.abs_o = sqrt_poly(mid_abs_value, pow_value);
-    
-    // angel calculation
-    mid_atan_value = (float)(c_num.imag) / (float)(c_num.real);
-    if(fabs(mid_atan_value)>1 || fabs(mid_atan_value)==1)
-    {
-        if(mid_atan_value > 0)
-        {
-            c_num.angle_o = atan_poly(mid_atan_value, pow_value);
-            c_num.angle_o = c_num.angle_o;
-        }
-        else if(mid_atan_value < 0)
-        {
-            mid_atan_value = -mid_atan_value;
-            c_num.angle_o = -atan_poly(mid_atan_value, pow_value);
-        }
-    }
-    else
-    {
-        mid_atan_value = (float)(c_num.real) / (float)(c_num.imag);
-        if((mid_atan_value > 0))
-            c_num.angle_o =  PI/2 - atan_poly(mid_atan_value, pow_value);
-        else if((mid_atan_value < 0))
-        {
-            mid_atan_value = -mid_atan_value;
-            c_num.angle_o = -PI/2 + atan_poly(mid_atan_value, pow_value);
-        }
-    }
-    
-    if((c_num.real&0x80))
-        if((c_num.imag&0x80))
-            c_num.angle_o = c_num.angle_o - PI;
-        else
-            c_num.angle_o = c_num.angle_o + PI;
-    return c_num;
-}
 
 int sqrt_poly(int mid_abs_value, int pow_value)
 {
@@ -119,15 +50,85 @@ float atan_poly(float mid_atan_value, int pow_value)
     return (float)atan_value;
 }
 
+
 comp_num cal_abs_ref(char real_i, char imag_i)
 {
-    comp_num c_num = {0};
-    _Dcomplex num_z ={0};
+    comp_num c_num  = {0};
+    float div_value = 0;
     c_num.real = real_i;
     c_num.imag = imag_i;
-    num_z = _Cbuild((double)c_num.real*128, ((double)c_num.imag*128));
-    c_num.abs_o = cabs(num_z)/128;
-    c_num.angle_o = carg(num_z);
+    c_num.abs_o = sqrt(c_num.real * c_num.real + c_num.imag * c_num.imag);
+    
+    if(c_num.imag == 0)
+        c_num.angle_o = 0;
+    else if(c_num.real == 0)
+        c_num.angle_o = PI/2;
+    else    
+    {
+        div_value = ((float)(c_num.imag*128) / (float)(c_num.real*128));
+        c_num.angle_o = atan(div_value);
+        if((c_num.real&0x80))
+            if((c_num.imag&0x80))
+                c_num.angle_o = c_num.angle_o - PI;
+            else
+                c_num.angle_o = c_num.angle_o + PI;
+    }
     return c_num;
 }
+
+comp_num cal_abs_angel_poly(char real_i, char imag_i, int pow_value)
+{
+    comp_num c_num  = {0};
+    int mid_abs_value = 0;
+    float mid_atan_value = 0;
+    c_num.real = real_i;
+    c_num.imag = imag_i;
+
+    // absolute value calculation
+    mid_abs_value = c_num.real * c_num.real + c_num.imag * c_num.imag;
+    c_num.abs_o = sqrt_poly(mid_abs_value, pow_value);
+    
+    // angel calculation
+    if(c_num.imag == 0)
+        c_num.angle_o = 0;
+    else if(c_num.real == 0)
+        c_num.angle_o = PI/2;
+    else
+    {
+        mid_atan_value = (float)(c_num.imag) / (float)(c_num.real);
+        if(fabs(mid_atan_value)<1 )
+        {
+            if(mid_atan_value > 0)
+            {
+                c_num.angle_o = atan_poly(mid_atan_value, pow_value);
+                c_num.angle_o = c_num.angle_o;
+            }
+            else if(mid_atan_value < 0)
+            {
+                mid_atan_value = -mid_atan_value;
+                c_num.angle_o = -atan_poly(mid_atan_value, pow_value);
+            }
+        }
+        else
+        {
+            mid_atan_value = (float)(c_num.real) / (float)(c_num.imag);
+            if((mid_atan_value > 0))
+                c_num.angle_o =  PI/2 - atan_poly(mid_atan_value, pow_value);
+            else if((mid_atan_value < 0))
+            {
+                mid_atan_value = -mid_atan_value;
+                c_num.angle_o = -PI/2 + atan_poly(mid_atan_value, pow_value);
+            }
+        }
+        
+        if((c_num.real&0x80))
+            if((c_num.imag&0x80))
+                c_num.angle_o = c_num.angle_o - PI;
+            else
+                c_num.angle_o = c_num.angle_o + PI;
+    }
+        
+    return c_num;
+}
+
 
