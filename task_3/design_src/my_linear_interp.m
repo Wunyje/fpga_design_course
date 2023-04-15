@@ -1,4 +1,4 @@
-function [y_interp_ext,SSE,RMSE, max_err] = my_linear_interp(x,y,x_interp)
+function [y_interp_ext,y_sqrt_interp, SSE,RMSE, max_err] = my_linear_interp(x,y,x_interp)
 % my_linear_interp 此处显示有关此函数的摘要
 % linear interpolation and extended the length
 % linear interpolation

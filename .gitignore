@@ -13,6 +13,7 @@ task_3/design_src/*
 !task_3/design_src/*.h
 !task_3/design_src/*.m
 !task_3/design_src/*.mat
+!task_3/design_src/*.txt
 *.json
 
 .vs
