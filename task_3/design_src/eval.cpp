@@ -1,4 +1,4 @@
-#include "cal_abs_angel.h"
+#include "cal_abs_angle.h"
 #define N 1024
 
 int main()
@@ -15,6 +15,8 @@ int main()
     for (int i = 0; i < 1024; i++) {
         fscanf(fp_k, "%f", &k_sqrt_interp[i]);
         fscanf(fp_b, "%f", &b_sqrt_interp[i]);
+        k_sqrt_interp_fix[i] = (int)(k_sqrt_interp[i]*pow(2,14));
+        b_sqrt_interp_fix[i] = (int)(b_sqrt_interp[i]*pow(2,14));
     }
     fclose(fp_k);
 
@@ -25,13 +27,15 @@ int main()
             res[i].imag = rand() % 256 - 128; // +- 128
         } while (sqrt(pow(res[i].real, 2)  + pow(res[i].imag, 2))/ 128.0 > 1.0);
         // results generation
-        res[i] = cal_abs_angel_test(res[i].real, res[i].imag, 2);
+        res[i] = cal_abs_angle_test(res[i].real, res[i].imag);
         res_ref[i] = cal_abs_ref(res[i].real, res[i].imag);
 
         // exam the results
         if((fabs((float)res[i].abs_o - (float)res_ref[i].abs_o) > 1.28)|(fabs(res[i].angle_o - res_ref[i].angle_o) > 0.01))
         {
             printf("There is a problem at index %d.\n", i);
+            printf("res[%d].real = %d.\n", i, res[i].real);
+            printf("res[%d].imag = %d.\n\n", i, res[i].imag);
             printf("res[%d].abs_o = %d.\t", i, res[i].abs_o);
             printf("res[%d].angle_o = %f.\n", i, res[i].angle_o);
             printf("res_ref[%d].abs_o = %d.\t", i, res_ref[i].abs_o);
