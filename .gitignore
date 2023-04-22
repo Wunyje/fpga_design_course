@@ -3,18 +3,107 @@
 *.xlsx
 
 # ignore xilinx file
+ip
 task_1/task1.xi/*
 !task_1/task1.xi/fpga_task1.xpr
 task_2/xi_median_filter/*
 !task_2/xi_median_filter/xi_median_filter.xpr
+task_2/xi_median_filter/*
+!task_2/xi_median_filter/xi_median_filter.xpr
+task_3/xi_cal_abs_angle/*
+!task_3/xi_cal_abs_angle/xi_cal_abs_angle.xpr
 
-task_3/design_src/*
-!task_3/design_src/*.cpp
-!task_3/design_src/*.h
-!task_3/design_src/*.m
-!task_3/design_src/*.mat
-!task_3/design_src/*.txt
-*.json
-
+# ignore some directory
 .vs
 .vscode
+build
+eval
+
+# c++ ignore
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# C ignore
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
