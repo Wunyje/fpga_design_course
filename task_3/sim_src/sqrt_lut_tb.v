@@ -60,7 +60,6 @@ module sqrt_lut_tb();
         forever@(posedge clk) begin
             addr <= addr + 1;
             sqrt_lut_in_data <= sqrt_in_mem[addr];
-            $display("Stimulus sqrt_lut_in_data at address %d is %b", addr, sqrt_lut_in_data);
         end
     end
     
@@ -83,7 +82,7 @@ module sqrt_lut_tb();
             if(valid_o) begin
                 i_check <= i_check + 1;
                 if(ref_sqrt_lut_o !=  sqrt_lut_o) begin
-                    $display("There is a problem at %d. Simulation terminated.", cnt);
+                    $display("There is a problem at %d. Simulation stopped.", cnt);
                     $stop( 0 ) ;
                 end
                 else if(i_check == N-1) begin

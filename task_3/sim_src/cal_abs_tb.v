@@ -68,7 +68,6 @@ module cal_abs_tb();
             addr <= addr + 1;
             real_i <= real_mem[addr];
             imag_i <= imag_mem[addr];
-            $display("Stimulus real_i, imag_i at address %d is %h and %h.", addr, real_i, imag_i);
         end
     end
     
@@ -92,7 +91,7 @@ module cal_abs_tb();
             if(val_o) begin
                 i_check <= i_check + 1;
                 if(ref_abs_o !=  abs_o) begin
-                    $display("There is a problem at %d. Simulation terminated.", cnt);
+                    $display("There is a problem at %d. Simulation stopped.", cnt);
                     $stop( 0 ) ;
                 end
                 else if(i_check == N-1) begin

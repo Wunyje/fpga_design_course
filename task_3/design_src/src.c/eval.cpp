@@ -140,12 +140,12 @@ void res_export()
         do {
             real_f = rand() % 256 - 128;
             imag_f = rand() % 256 - 128;
-        } while (fabs(real_f/imag_f) > 1);
+        } while (fabs(real_f/imag_f) > 1 || real_f/imag_f < 0);
         atan_in = (int)(real_f*pow(2, 7)/imag_f);
-        fprintf(fp_atan_in, "%08x\n", atan_in);
-        atan_out = atan_poly_fix(atan_in) >> 5;
-        printf("%f\t, %x\n", ((float)atan_out)/pow(2,16), (atan_out));
-        fprintf(fp_atan_out, "%08x\n", atan_out);
+        fprintf(fp_atan_in, "%02x\n", atan_in);
+        atan_out = atan_poly_fix(atan_in) >> 9;
+        printf("%f\t, %x\n", ((float)atan_out)/pow(2,12), (atan_out));
+        fprintf(fp_atan_out, "%04x\n", atan_out);
 
     }
 }

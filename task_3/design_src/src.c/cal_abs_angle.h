@@ -63,39 +63,33 @@ int sqrt_poly(int mid_abs_value) //总相对误差不低于15.6%
 int atan_poly_fix(int mid_atan_value)
 {
     int mid_atan_value_pow_2 = pow(mid_atan_value, 2);
-    int co_A = -0.2886* pow(2, 7);
+    int co_A = -37;
     int co_B = 1.08* pow(2, 7);
-    int co_C = -0.005194* pow(2, 7);
+    int co_C = -0.005194* pow(2, 14);
     int mul_co_A = 0;
     int mul_co_B = 0;
+    int add_co_C = 0;
     int atan_value = 0;
     mul_co_A = co_A*mid_atan_value_pow_2;
     mul_co_B = co_B*mid_atan_value;
+    add_co_C = mul_co_B + co_C;
+    atan_value = mul_co_A + add_co_C*pow(2, 7);
+    
 
-    mul_co_A = mul_co_A + mul_co_B*pow(2, 7);
-    atan_value = mul_co_A + co_C*pow(2,14);
-
-    // atan_value = -0.06033*pow(mid_atan_value, 3) + (-0.1981)*pow(mid_atan_value, 2) + mid_atan_value*1.044 + -0.002178;
     return atan_value;
 }
 
-float angle_cal_poly_fix(comp_num c_num)
+int pattern_match(comp_num c_num)
 {
-    int mid_atan_value = 0;
     int real_value = c_num.real;
     int imag_value = c_num.imag;
-	int angle_o = 0;
-    float final_angle = 0;
-    int pi_fix = (int)(PI* pow(2,12));
-    int pi_div_2_fix = (int)((PI/2)* pow(2,12));
     int case_flag = 0; 
-    
-    // angle calculation
-    // interval and value check
+    int pattern_match_res = 0;
+    int mid_atan_value = 0;
     int imag_eq_real = (abs(imag_value) == abs(real_value));
     int imag_ls_real = abs(imag_value) < abs(real_value);
     int imag_bg_real = abs(imag_value) > abs(real_value);
-    
+
     if(imag_eq_real && (imag_value == 0))
     {
         mid_atan_value = 0;
@@ -136,7 +130,25 @@ float angle_cal_poly_fix(comp_num c_num)
             case_flag = case_flag + 0x10;
         else
             case_flag = case_flag + 0x20;
+    pattern_match_res = (case_flag << 8 )+ mid_atan_value;
+    return pattern_match_res;
+}
 
+float angle_cal_poly_fix(comp_num c_num)
+{
+    int mid_atan_value = 0;
+	int angle_o = 0;
+    float final_angle = 0;
+    int pi_fix = (int)(PI* pow(2,12));
+    int pi_div_2_fix = (int)((PI/2)* pow(2,12));
+    int case_flag = 0; 
+    
+    // angle calculation
+    // interval and value check
+    case_flag = pattern_match(c_num);
+    mid_atan_value = case_flag & 0xff;
+    case_flag = case_flag >> 8;
+ 
     // calculation part  
     angle_o = atan_poly_fix(mid_atan_value);
     switch(case_flag & 0xf)
