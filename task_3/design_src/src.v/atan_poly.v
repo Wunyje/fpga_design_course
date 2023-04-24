@@ -29,7 +29,7 @@ module atan_poly(
     );
     
     reg [3:0] val_r = 0;
-    assign val_o = val_r[3];
+    assign val_o = val_r[2];
     always@(posedge clk) begin
       val_r[0] <= val_i;
       val_r[1] <= val_r[0];

@@ -70,6 +70,8 @@ void res_export()
     int mid_abs_value = 0;
     int k_value = 0;
     int b_value = 0;
+    int case_flag_out = 0;
+    int mid_atan_value = 0;
 
     FILE* fp_real_value;
     FILE* fp_imag_value;
@@ -81,6 +83,8 @@ void res_export()
     FILE* fp_k;
     FILE* fp_b;
     FILE* fp_para_for_sqrt_lut;
+    FILE* fp_case_flag_out;
+    FILE* fp_mid_atan_out;
 
     fp_real_value = fopen("para_and_res/input_real_value.txt", "w+");
     fp_imag_value = fopen("para_and_res/input_imag_value.txt", "w+");
@@ -92,7 +96,8 @@ void res_export()
     fp_k = fopen("para_and_res/para_k_sqrt_fix.coe", "w+");
     fp_b = fopen("para_and_res/para_b_sqrt_fix.coe", "w+");
     fp_para_for_sqrt_lut = fopen("para_and_res/para_for_sqrt_lut.coe", "w+");
-
+    fp_case_flag_out = fopen("para_and_res/mid_case_flag_out.txt", "w+");
+    fp_mid_atan_out = fopen("para_and_res/mid_atan_out.txt", "w+");
     para_load();
 
     for (int i = 0; i < N; i++) 
@@ -133,9 +138,14 @@ void res_export()
         fprintf(fp_sqrt_out, "%x\n", sqrt_out);
 
         c_num = cal_abs_angle_test(real_value, imag_value);
-        angle_cal_res = (int)(c_num.angle_o*pow(2,14));
+        angle_cal_res = (int)(c_num.angle_o*pow(2,12));
         fprintf(fp_angle_cal_res, "%x\n", angle_cal_res);
 
+        case_flag_out = pattern_match(c_num);
+        mid_atan_value = case_flag_out & 0xff;
+        case_flag_out = case_flag_out >> 8;
+        fprintf(fp_case_flag_out, "%01x\n", case_flag_out);
+        fprintf(fp_mid_atan_out, "%02x\n", mid_atan_value);
 
         do {
             real_f = rand() % 256 - 128;
@@ -152,6 +162,6 @@ void res_export()
 
 int main()
 {
-    eval();
+    res_export();
     return 1;
 }

@@ -40,61 +40,74 @@ module pattern_match(
     end
 
     wire [7:0] abs_real_w = (real_i[7]? ~real_i + 1'b1 : real_i) ;
-    wire [7:0] abs_imag_w = (real_i[7]? ~real_i + 1'b1 : real_i) ;
+    wire [7:0] abs_imag_w = (imag_i[7]? ~imag_i + 1'b1 : imag_i) ;
     reg  [7:0] abs_real_r = 0;
     reg  [7:0] abs_imag_r = 0;
-    reg  [7:0] real_i_r = 0;
-    reg  [7:0] imag_i_r = 0;
+    reg        real_sign_r = 0;
+    reg        imag_sign_r = 0;
     always@(posedge clk) begin
-        real_i_r <= real_i;
-        imag_i_r <= imag_i;
+        real_sign_r <= real_i[7];
+        imag_sign_r <= imag_i[7];
         abs_real_r <= abs_real_w;
         abs_imag_r <= abs_imag_w;
     end
 
-    wire real_sign = real_i_r[7];
-    wire imag_sign = imag_i_r[7];
-    wire div_sign = real_sign | imag_sign;
+    wire real_sign = real_sign_r;
+    wire imag_sign = imag_sign_r;
     wire imag_eq_zero = (abs_imag_r == 0)?1:0;
     wire real_eq_zero = (abs_real_r == 0)?1:0;
+    wire div_sign = (real_sign ^ imag_sign) & (~imag_eq_zero) & (~real_eq_zero);
     wire imag_eq_real = (((abs_real_r == abs_imag_r)&&(~imag_eq_zero))?1'b1 : 1'b0);
     wire imag_ls_real = ((abs_real_r > abs_imag_r)?1'b1 : 1'b0);
     wire imag_bg_real = ((abs_real_r < abs_imag_r)?1'b1 : 1'b0);
 
     wire all_zero = (~(abs_real_r && abs_imag_r)); 
-    wire abs_div_within_0 = ((~div_sign) && (~imag_eq_zero)) || (imag_eq_zero && (~real_sign));
-    wire abs_div_within_1 = div_sign   || ( imag_eq_zero && real_sign) ;
-    wire abs_div_without_0 = ((~div_sign) && (~real_eq_zero)) || (real_eq_zero  && (~imag_sign));
-    wire abs_div_without_1 = div_sign || ( real_eq_zero && imag_sign) ;
+    wire abs_div_within = ~div_sign;
+    wire abs_div_without = ((~div_sign) && ~(real_eq_zero && (imag_sign)));
 
-    assign      case_flag = case_flag_r;
     reg [2:0]   case_flag_r = 0;
+    reg [2:0]   case_flag_r_1 = 0;
+    reg [15:0]  dividened_r = 0;
+    reg [7:0]   divisor_r = 0;
+    
+    assign      case_flag = case_flag_r_1;
+    
+    always@(posedge clk) begin
+        case_flag_r_1 <= case_flag_r;
+    end
+    
     always@(posedge clk) begin
         if(all_zero && val_r[1]) begin
             case_flag_r <= 0;
+            dividened_r <= 0;
+            divisor_r <= 1;
         end
-        if(imag_ls_real || imag_eq_real) begin
-            if(abs_div_within_0 && val_r[1]) begin
+        if((imag_ls_real || imag_eq_real) && val_r[1]) begin
+            dividened_r <= {abs_imag_r, 7'b0};
+            divisor_r <= abs_real_r;
+            if(abs_div_within) begin
                 if(real_sign)
                     case_flag_r <= 0;
                 else
                     case_flag_r <= 1;
             end
-            if(abs_div_within_1 && val_r[1]) begin
-               if(real_sign)
+            else begin
+                if(real_sign)
                     case_flag_r <= 2;
                 else
                     case_flag_r <= 3;
             end
         end
-        if(imag_bg_real) begin
-            if(abs_div_without_0 && val_r[1]) begin
+        if(imag_bg_real && val_r[1]) begin
+            dividened_r <= {abs_real_r, 7'b0};
+            divisor_r <= abs_imag_r;
+            if(abs_div_without) begin
                 if(real_sign)
                     case_flag_r <= 4;
                 else
                     case_flag_r <= 5;
             end
-            if(abs_div_without_1 && val_r[1]) begin
+            else begin
                 if(real_sign)
                     case_flag_r <= 6;
                 else
@@ -103,47 +116,15 @@ module pattern_match(
         end   
     end
 
-    assign into_atan_poly = div_res[15:8];
-    reg [15:0] dividened = 0;
-    reg [7:0]  divisor = 0;
-    wire [23:0] div_res;
-    always@(*) begin
-        if(all_zero && val_r[1]) begin
-            dividened = 0;
-            divisor = 1;
-        end
-        if(imag_ls_real || imag_eq_real) begin
-            // mid_atan_value = (imag_value)* pow(2,7)/ (real_value);
-            if(abs_div_within_0 && val_r[1]) begin
-                dividened = {imag_i_r, 7'b0};
-                divisor = real_i_r;
-            end
-            if(abs_div_within_1 && val_r[1]) begin
-                // mid_atan_value = -mid_atan_value;
-                dividened = {(imag_i_r[7]? ~imag_i_r + 1'b1 : imag_i_r) , 7'b0};
-                divisor = real_i_r;
-            end
-        end
-        if(imag_bg_real) begin
-            // mid_atan_value = (real_value)* pow(2,7) / (imag_value);
-            if(abs_div_without_0 && val_r[1]) begin
-                // mid_atan_value = mid_atan_value;
-                dividened = {real_i_r, 7'b0};
-                divisor = imag_i_r;
-            end
-            if(abs_div_without_1 && val_r[1]) begin
-                // mid_atan_value = -mid_atan_value;
-                dividened = {(real_i_r[7]? ~real_i_r + 1'b1 : real_i_r) , 7'b0};
-                divisor = imag_i_r;
-            end
-        end   
-    end
+    wire    [23:0]  div_res;
+    wire            div_val_o;
+    assign          into_atan_poly = div_res[15:8];
     cal_angle_div_wrapper cal_angle_div(
         .clk      (clk) ,
-        .dividened(dividened) ,  // [15:0]
-        .divisor  (divisor) ,  // [7:0]
-        .val_i    (val_r[1]) ,
-        .val_o    () ,
+        .dividened(dividened_r) ,  // [15:0]
+        .divisor  (divisor_r) ,  // [7:0]
+        .val_i    (val_r[2]) ,
+        .val_o    (div_val_o) ,
         .div_res  (div_res)    // [23:0]
     );
 

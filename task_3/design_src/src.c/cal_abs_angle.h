@@ -91,45 +91,50 @@ int pattern_match(comp_num c_num)
     int imag_bg_real = abs(imag_value) > abs(real_value);
 
     if(imag_eq_real && (imag_value == 0))
-    {
+    { // imag = real = 0
         mid_atan_value = 0;
-        case_flag = 2;
+        case_flag = 1;
     }
     if(imag_ls_real || (imag_eq_real && imag_value))
-    {
+    { // [-1, 1]
         mid_atan_value = (imag_value)* pow(2,7)/ (real_value);
-        if((!(mid_atan_value & 0x8000) && mid_atan_value) || ((mid_atan_value == 0) && (!(real_value & 0x8000))))
-        {
+        if(!(mid_atan_value & 0x8000))
+        {// [0, 1]
             mid_atan_value = mid_atan_value;
-            case_flag = 2;
+            if(real_value&0x8000) // real < 0
+                case_flag = 0;
+            else                  // real > 0
+                case_flag = 1;
         }
-        if(mid_atan_value & 0x8000 || ((mid_atan_value == 0) && (real_value & 0x8000)) )
-        {
+        else
+        {// [-1, 0)
             mid_atan_value = -mid_atan_value;
-            case_flag = 3;
+            if(real_value&0x8000) // real < 0
+                case_flag = 2;
+            else                  // real > 0
+                case_flag = 3;
         }
     }
     if(imag_bg_real)
     {
         mid_atan_value = (real_value)* pow(2,7) / (imag_value);
-        if((!(mid_atan_value & 0x8000) && mid_atan_value) || ((mid_atan_value == 0) && (!(imag_value & 0x8000))))
-        {
+        if(!(mid_atan_value & 0x8000) && !((!real_value) && (imag_value & 0x8000)))
+        {// (1, +∞)
             mid_atan_value = mid_atan_value;
-            case_flag = 4;
-
+            if(real_value & 0x8000) // imag < 0
+                case_flag = 4;
+            else                  // imag > 0
+                case_flag = 5;
         }
-        if(mid_atan_value & 0x8000 || ((mid_atan_value == 0 ) && (imag_value & 0x8000)))
-        {
+        else
+        {// (-∞, -1)
             mid_atan_value = -mid_atan_value;
-            case_flag = 5;
+            if(real_value & 0x8000) // imag < 0
+                case_flag = 6;
+            else                  // imag > 0
+                case_flag = 7;        
         }
     }
-
-    if(real_value&0x8000)
-        if(imag_value&0x8000)
-            case_flag = case_flag + 0x10;
-        else
-            case_flag = case_flag + 0x20;
     pattern_match_res = (case_flag << 8 )+ mid_atan_value;
     return pattern_match_res;
 }
@@ -139,8 +144,8 @@ float angle_cal_poly_fix(comp_num c_num)
     int mid_atan_value = 0;
 	int angle_o = 0;
     float final_angle = 0;
-    int pi_fix = (int)(PI* pow(2,12));
-    int pi_div_2_fix = (int)((PI/2)* pow(2,12));
+    int pi_fix = 12868;//(int)(PI* pow(2,12));
+    int pi_div_2_fix = 6434;// (int)((PI/2)* pow(2,12));
     int case_flag = 0; 
     
     // angle calculation
@@ -151,30 +156,41 @@ float angle_cal_poly_fix(comp_num c_num)
  
     // calculation part  
     angle_o = atan_poly_fix(mid_atan_value);
-    switch(case_flag & 0xf)
+    switch(case_flag)
     {
-    case 2 :
+    case 0 :
+       angle_o =  angle_o >> 9;
+       angle_o =  angle_o - pi_fix;
+       break; 
+    case 1  :
        angle_o =  angle_o >> 9;
        break; 
+    case 2 :
+       angle_o = -(angle_o >> 9);
+       angle_o =  angle_o + pi_fix;
+       break; 
     case 3  :
-       angle_o = -angle_o  >> 9;
+       angle_o = -(angle_o >> 9);
        break; 
     case 4 :
-       angle_o = -(angle_o >> 9);
-       angle_o =  pi_div_2_fix + angle_o ;
+       angle_o = (-angle_o  >> 9);
+       angle_o = angle_o - pi_div_2_fix;
        break; 
     case 5  :
+       angle_o = (-angle_o  >> 9);
+       angle_o = angle_o + pi_div_2_fix;
+       break; 
+    case 6 :
        angle_o = angle_o >> 9;
-       angle_o = -pi_div_2_fix + angle_o;
+       angle_o = angle_o + pi_div_2_fix ;
+       break; 
+    case 7  :
+       angle_o = angle_o >> 9;
+       angle_o = angle_o - pi_div_2_fix ;
        break; 
     default : 
        ;
     }
-    if((case_flag&0xf0 )== 0x10)
-        angle_o = angle_o - pi_fix;
-    if((case_flag&0xf0) == 0x20)
-        angle_o = angle_o + pi_fix;
-
     final_angle = (float)(angle_o/pow(2,12));
     return final_angle;
 }
