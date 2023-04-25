@@ -19,10 +19,13 @@ void para_load()
     fclose(fp_b);
 }
 
+// 测试函数
 void eval()
 {
     comp_num res[N] = {0};
     comp_num res_ref[N] = {0};
+    float    cal_abs_err_max = 0;
+    float    cal_angle_err_max = 0;
     para_load();
 
     // data generation
@@ -34,6 +37,10 @@ void eval()
         // results generation
         res[i] = cal_abs_angle_test(res[i].real, res[i].imag);
         res_ref[i] = cal_abs_ref(res[i].real, res[i].imag);
+        if(fabs(res[i].abs_o - res_ref[i].abs_o) > cal_abs_err_max)
+            cal_abs_err_max = fabs(res[i].abs_o - res_ref[i].abs_o);
+        if(fabs(res[i].angle_o - res_ref[i].angle_o) > cal_angle_err_max)
+            cal_angle_err_max = fabs(res[i].angle_o - res_ref[i].angle_o);
 
         // exam the results
         if((fabs((float)res[i].abs_o - (float)res_ref[i].abs_o) > 1.28)|(fabs(res[i].angle_o - res_ref[i].angle_o) > 0.0314))
@@ -49,12 +56,11 @@ void eval()
             break;
         }
         else if(i == N-1)
-            printf("Test passed!\n");
+            printf("Test passed! \n Biggest abs_o_err: %f\%,\n Biggest angle_o_err: %f\%.\n",cal_abs_err_max/1.28, 100*cal_angle_err_max/PI);
     }
 }
 
-// res export
-
+// 中间结果导出
 void res_export()
 {
     int real_value = 0;
@@ -162,6 +168,6 @@ void res_export()
 
 int main()
 {
-    res_export();
+    eval();
     return 1;
 }

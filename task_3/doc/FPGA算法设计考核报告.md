@@ -67,31 +67,63 @@ $$h:\operatorname{atan}\left(-\frac{x}{y}\right)+\frac{\pi}{2}, \quad \frac{y}{x
 || 模值计算误差|幅角计算误差 |
 |:---|:---:|:---:|
 |MATLAB设计| 0.78%|0.67% |
-|C++软件仿真| | |
-|Verilog仿真| | |
+|C++软件仿真|0.78%|0.36% |
+|Verilog仿真| 0.78%|0.36% |
 ### 3.1.2 资源占用
+
+
+|          Site Type         | Used | Util% |
+|----------------------------|------|-------|
+| Slice LUTs                 |  143 |  1.79 |
+| Slice Registers            |  123 |  0.77 |
+| MUL IP                     |    6 |  NULL |   
+| BRAM IP                    |    1 |  NULL |   
+| DIV IP                     |    1 |  NULL |   
+
+
 ### 3.2 速度指标
-结合上述，模值计算延迟为3个周期，幅角运算延迟为7个周期，经时序对齐，系统整体延迟为7个周期，如下表所示
-|| 模值计算|幅角计算 |系统整体|
-|:---|:---:|:---:|:---:|
-|最高工作频率| | | |
-|吞吐量| | | |
-|延迟周期数| | | |
+结合上述，模值计算延迟为3个周期，幅角运算延迟为7个周期，经时序对齐，系统整体延迟为7个周期。
+
+结合综合工具给出的时序综合结果：
+
+Clock | Edges (WNS) | WNS (ns) | WHS (ns) | WPWS (ns) |
+----- | ----- | ----- |----- | ----- |
+clk | rise - rise | 0.042 | 0.065 | 4.416 |
+
+由
+$$F_{max} = \frac{1}{(T-WNS)}$$
+且
+$$T = 10(ns)$$
+可求
+$$ F_{max} = 100.42 MHz $$
+最终系统速度指标如下表所示：
+| 最高工作频率|吞吐量 |延迟周期数|
+|:---:|:---:|:---:|
+|100.42Mhz|24bit/clk |7clk |
+
 ## 4 验证
 ### 4.1 验证方法
-为保证软硬件验证的连续性，在设计过程中先用C++模拟出了定点数计算，将函数与硬件模块对应后导出了相应输入输出值，如此在编写testbench时可直接读取这些文件，分别作为激励和参照结果。并在testbench中编写测试通过条件，如此测试方法比看波形更高效，更完整。
+为保证软硬件验证的连续性，在设计过程中先用C++模拟出了定点数计算，将函数与硬件模块对应后导出了相应输入输出值，如此在编写testbench时可直接读取这些文件，分别作为激励和参照结果。并在testbench中一一比对仿真输出与软件输出结果，所有测试结果一致或误差咋在允许范围内者即打印输出“Test passed”。如此测试方法比看波形更高效，更完整。
 ### 4.2 验证结果
-![图() sqrt_lut验证结果](sqrt_lut验证结果.jpg)
+cal_abs_angle验证结果
+![图() cal_abs_angle验证结果](sim_graph/cal_abs_angle_sim.png)
+sqrt_lut验证结果
+![图() sqrt_lut验证结果](sim_graph/sqrt_lut_sim.png)
+cal_abs验证结果
+![图() cal_abs验证结果](sim_graph/cal_abs_sim.png)
+pattern_match验证结果
+![图() pattern_match验证结果](sim_graph/pattern_match_sim.png)
 
-![图() cal_abs验证结果](cal_abs验证结果.jpg)
+atan_poly验证结果
+![图() atan_poly验证结果](sim_graph/atan_poly_sim.png)
 
-![图() pattern_match验证结果](pattern_match验证结果.jpg)
+cal_angle验证结果
+![图() cal_angle验证结果](sim_graph/cal_angle_sim.png)
+且在命令行内，上述所有测试均打印输出“Test passed”字样。
 
-![图() atan_poly验证结果](atan_poly验证结果.jpg)
-
-![图() cal_angle验证结果](sqrt_lut验证结果.jpg)
 ## 5 附件
 ### 5.1 模块代码
+
 ### 5.2 验证代码
 
                  

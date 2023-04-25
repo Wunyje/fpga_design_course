@@ -94,12 +94,19 @@ module cal_abs_angle_tb();
     integer        i_check = 0;
     wire    [7:0]  ref_abs_o = res_sqrt_out_mem[i_check];
     wire    [15:0] ref_angle_o = res_angle_cal_mem[i_check];
-    wire    [15:0] sim_err = (ref_angle_o > angle_o) ? ref_angle_o - angle_o: angle_o - ref_angle_o;
+    wire    [15:0] angle_o_sim_err = (ref_angle_o > angle_o) ? ref_angle_o - angle_o: angle_o - ref_angle_o;
+    wire    [7:0]  abs_o_sim_err = (ref_abs_o > abs_o) ? ref_abs_o - abs_o: abs_o - ref_abs_o;
+    reg     [15:0] max_angle_err = 0;
+    reg     [7:0]  max_abs_err = 0;
     initial begin
         forever@(posedge clk) begin
             if(val_o) begin
                 i_check <= i_check + 1;
-                if((sim_err > 1)|| (ref_abs_o != abs_o)) begin
+                if(max_angle_err < angle_o_sim_err)
+                    max_angle_err <= angle_o_sim_err;
+                if(max_abs_err < abs_o_sim_err)
+                    max_abs_err <= abs_o_sim_err;
+                if((angle_o_sim_err > 1)|| (ref_abs_o != abs_o)) begin
                     $display("There is a problem at %d. Simulation stopped.", i_check + 1);
                     $stop( 0 ) ;
                 end
