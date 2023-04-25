@@ -1,6 +1,6 @@
 function [y_interp_ext,y_sqrt_interp, SSE,RMSE, max_err] = my_linear_interp(x,y,x_interp)
 % my_linear_interp 此处显示有关此函数的摘要
-% linear interpolation and extended the length
+% 线性插值，并以直线填充插值点间空档。与被插函数等长。
 % linear interpolation
 if x_interp(end) ~= x(end)
     x_interp = [x_interp, x(end)];
