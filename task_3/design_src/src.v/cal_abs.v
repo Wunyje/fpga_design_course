@@ -7,7 +7,7 @@
 // Design Name: 
 // Module Name: cal_abs
 // Project Name: 
-// Target Devices: 
+// Target Devices: xa7a12tcpg238-2I
 // Tool Versions: 
 // Description: 
 // 
